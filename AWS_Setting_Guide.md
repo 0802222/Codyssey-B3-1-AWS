@@ -1,3 +1,6 @@
+# 0. Architecture
+![alt text](docs/architecture.png)
+
 # 1. IAM
 이 과제는 최소권한 원칙을 위해 root 계정이 아닌 `IAM 사용자`를 만들어서 권한을 부여하고 실습한다.
 
@@ -90,3 +93,93 @@
 
 <br>
 
+# 6. EC2 인스턴스 생성
+
+EC2 - Instances - 인스턴스 시작 - 이름 및 태그 (원하는 이름 입력) - 애플리케이션 및 OS 이미지(AMI: Ubuntu LTS) - 인스턴스 유형 (t3.micro 또는 프리티어 사용가능한 유형으로 선택) - Key pair (새로 생성, 이름 입력, RSA, .pem) - Network settings - VPC (방금 만든 VPC) - Subnet (public subnet) -
+퍼블릭 IP 자동할당 (활성화) - Security group (방금 만든 시큐리티 그룹) - 인스턴스 시작 클릭
+
+<br>
+
+# 7. 인스턴스에 SSH 접속
+
+`EC2` - `Instances` - 방금 만든 인스턴스 선택 - `연결` - `SSH 클라이언트 내부` - 권한 부여 명령어와 SSH 접속 명령어 확인
+
+SSH 클라이언트 열기 (내 로컬 터미널을 뜻함) - `.pem key`가 저장된 곳으로 이동 - 권한부여 (chmod 400 "my-key-pair.pem") - 퍼블릭 IP를 사용해서 인스턴스 연결 (ssh -i "my-key-pair.pem" ubuntu@퍼블릭IP)
+
+<br>
+
+# 8. 웹 서버 설치 및 실행 (Ubuntu 기준)
+7번에서 SSH에 접속되면 서버 안에서 웹 서버(nginx) 설치
+
+```bash
+# 1. 패키지 업데이트
+sudo apt update
+
+# 2. nginx 설치
+sudo apt install nginx
+
+# 3. nginx 시작
+sudo systemctl start nginx
+
+# 4. 상태 확인
+sudo systemctl status nginx
+
+# 5. localhost 접속 테스트 (sudo 불필요)
+curl http://localhost
+```
+
+```text
+# nginx의 index 파일 내용
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+인스턴스 내부에서 localhost 접속이 성공해야 함
+curl http://localhost 에서 200 응답이 나와야 함
+
+<br>
+
+# 9. 외부 접속 테스트
+
+EC2 인스턴스 상세 화면에서 Public IPv4 address 확인
+
+- 브라우저에서 확인 `http://퍼블릭IP`
+
+    ![alt text](docs/screenshots/public-ip.png)
+
+- 브라우저에서 확인 `http://퍼블릭IP/health`
+    정상 화면 또는 200 OK 확인
+    
+    ![alt text](docs/screenshots/public-ip-health.png)
+
+<br>
+
+# 10. 마지막 정리
+
+- [ ] EC2 인스턴스 종료
+- [ ] EBS 볼륨 삭제
+- [ ] Elastic IP 해제
+- [ ] Internet Gateway 분리 후 삭제
+- [ ] VPC 삭제
+- [ ] Billing Dashboard 확인
