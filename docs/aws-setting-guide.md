@@ -1,5 +1,5 @@
 # 0. Architecture
-![alt text](docs/architecture.png)
+![alt text](architecture.png)
 
 ## 아키텍처 구성도
 
@@ -144,7 +144,7 @@ AWS 클라우드 안에 만드는 개인 네트워크 공간. 집 처럼, 외부
 ### 1. VPC 생성
 `VPC` - `VPC 생성` - `생성할 리소스`(VPC만) - 이`름 태그`(원하는 이름 입력) - `IPv4 CIDR 블록`(수동 입력) - 기타 기본 값 유지 - `VPC 생성` 클릭
 
-![alt text](docs/screenshots/create-vpc.png)
+![alt text](screenshots/create-vpc.png)
 
 ### 2. Subnet 생성
 VPC를 더 작은 네트워크로 분할한 것. VPC라는 큰 집을 방(Subnet)으로 나누는 것처럼, 목적에 따라 여러 개의 작은 네트워크로 구분한다.
@@ -157,7 +157,7 @@ VPC를 더 작은 네트워크로 분할한 것. VPC라는 큰 집을 방(Subnet
 
 
 
-![alt text](docs/screenshots/create-subnets.png)
+![alt text](screenshots/create-subnets.png)
 * `CIDR` 블록
 : IP 주소범위를 나타내는 표기법
 
@@ -186,7 +186,7 @@ VPC가 인터넷과 통신할 수 있게 해주는 관문. 집의 현관문처�
 `VPC` - `Internet gateways` 선택 - `인터넷 게이트웨이 생성` 클릭 - `이름 태그`(원하는 이름으로 입력) - `생성` - 생성된 IGW 선택 - `사용 가능한 VPC`(만들어둔 VPC 선택) -
 `인터넷 게이트웨이 연결` 클릭 - 연결 완료
 
-![alt text](docs/screenshots/create-internet-gateway.png)
+![alt text](screenshots/create-internet-gateway.png)
 
 <br>
 
@@ -220,7 +220,7 @@ VPC가 인터넷과 통신할 수 있게 해주는 관문. 집의 현관문처�
 
 >  **주의:** 이 연결이 없으면 Subnet이 프라이빗이 되어 외부 접속 불가
 
-![alt text](docs/screenshots/create-route-table.png)
+![alt text](screenshots/create-route-table.png)
 <br>
 
 # 5. Security Group 생성
@@ -230,7 +230,7 @@ VPC가 인터넷과 통신할 수 있게 해주는 관문. 집의 현관문처�
 
 `EC2` - `Security Groups`(보안 그룹) - `보안 그룹 생성` - `Security group name` (원하는 이름 입력) - `Description` (설명 입력) - `VPC`(방금 만든 VPC 선택) - `인바운드 규칙` - `규칙 추가` - `SSH`(TCP / 22 / 소스 : 내 IP), `HTTP` (TCP / 80 / 소스 : Anywhere-IPv4) - `보안그룹 생성`
 
-![alt text](docs/screenshots/create-security-group.png)
+![alt text](screenshots/create-security-group.png)
 
 <br>
 
@@ -271,7 +271,7 @@ EC2 - Instances - 인스턴스 시작
 
 > **Key pair 저장:** .pem 파일을 안전한 곳에 저장해야한다. ( 분실하면 인스턴스에 접속할 수 없음)
 
-![alt text](docs/screenshots/create-ec2.png)
+![alt text](screenshots/create-ec2.png)
 <br>
 
 # 7. 인스턴스에 SSH 접속
