@@ -91,6 +91,9 @@
 : AWS 리소스에 접근할 수 있는 권한을 관리하는 시스템
 
 이 과제는 최소권한 원칙을 위해 root 계정이 아닌 `IAM 사용자`를 만들어서 권한을 부여하고 실습한다.
+- 사용 계정: 별도 생성한 IAM 사용자
+- AdministratorAccess 미사용
+- 사용 권한: EC2 및 VPC 구성에 필요한 권한으로 제한
 
 <br>
 
@@ -141,6 +144,8 @@ AWS 클라우드 안에 만드는 개인 네트워크 공간. 집 처럼, 외부
 ### 1. VPC 생성
 `VPC` - `VPC 생성` - `생성할 리소스`(VPC만) - 이`름 태그`(원하는 이름 입력) - `IPv4 CIDR 블록`(수동 입력) - 기타 기본 값 유지 - `VPC 생성` 클릭
 
+![alt text](docs/screenshots/create-vpc.png)
+
 ### 2. Subnet 생성
 VPC를 더 작은 네트워크로 분할한 것. VPC라는 큰 집을 방(Subnet)으로 나누는 것처럼, 목적에 따라 여러 개의 작은 네트워크로 구분한다.
 
@@ -151,6 +156,8 @@ VPC를 더 작은 네트워크로 분할한 것. VPC라는 큰 집을 방(Subnet
 `VPC` - `서브넷` - `서브넷 생성` - `VPC ID` (방금 만든 VPC 이름 클릭) - `서브넷 이름` (원하는 이름 입력) - `가용 영역` (서울리전의 한 영역 클릭) - IPv4 VPC CIDR* 블록 (10.0.0.0/16) - IPv4 서브넷 CIDR 블록(10.0.1.0/24, 10.0.2.0/24 => 보통 2개로 설정(가용영역 분산, 퍼블릭/프라이빗 분리)) - `서브넷 생성` 클릭
 
 
+
+![alt text](docs/screenshots/create-subnets.png)
 * `CIDR` 블록
 : IP 주소범위를 나타내는 표기법
 
@@ -178,6 +185,8 @@ VPC가 인터넷과 통신할 수 있게 해주는 관문. 집의 현관문처�
 
 `VPC` - `Internet gateways` 선택 - `인터넷 게이트웨이 생성` 클릭 - `이름 태그`(원하는 이름으로 입력) - `생성` - 생성된 IGW 선택 - `사용 가능한 VPC`(만들어둔 VPC 선택) -
 `인터넷 게이트웨이 연결` 클릭 - 연결 완료
+
+![alt text](docs/screenshots/create-internet-gateway.png)
 
 <br>
 
@@ -211,16 +220,26 @@ VPC가 인터넷과 통신할 수 있게 해주는 관문. 집의 현관문처�
 
 >  **주의:** 이 연결이 없으면 Subnet이 프라이빗이 되어 외부 접속 불가
 
+![alt text](docs/screenshots/create-route-table.png)
 <br>
 
 # 5. Security Group 생성
-EC2 인스턴스 앞에 있는 방화벽. 어떤 포트를 열고 닫을지, 누가 들어올 수 있는지를 결정해서 보안을 지킨다.
+- HTTP 80: `0.0.0.0/0` 허용
+- SSH 22: 개인 IP만 허용
+- 전체 포트 허용 규칙 없음
 
 `EC2` - `Security Groups`(보안 그룹) - `보안 그룹 생성` - `Security group name` (원하는 이름 입력) - `Description` (설명 입력) - `VPC`(방금 만든 VPC 선택) - `인바운드 규칙` - `규칙 추가` - `SSH`(TCP / 22 / 소스 : 내 IP), `HTTP` (TCP / 80 / 소스 : Anywhere-IPv4) - `보안그룹 생성`
+
+![alt text](docs/screenshots/create-security-group.png)
 
 <br>
 
 # 6. EC2 인스턴스 생성
+- 리전: 서울 `ap-northeast-2`
+- 인스턴스: EC2 micro급
+- 운영체제: Ubuntu LTS
+- 웹 서버: Nginx
+
 클라우드에서 빌려 쓰는 가상 서버(컴퓨터). 이것을 통해 웹 서버 등 원하는 프로그램을 실행할 수 있다.
 
 **중요 설정 항목:**
@@ -252,6 +271,7 @@ EC2 - Instances - 인스턴스 시작
 
 > **Key pair 저장:** .pem 파일을 안전한 곳에 저장해야한다. ( 분실하면 인스턴스에 접속할 수 없음)
 
+![alt text](docs/screenshots/create-ec2.png)
 <br>
 
 # 7. 인스턴스에 SSH 접속
@@ -342,130 +362,10 @@ Commercial support is available at
 </html>
 ```
 
-인스턴스 내부에서 localhost 접속이 성공해야 함
-curl http://localhost 에서 200 응답이 나와야 함
+- 인스턴스 내부 검증: `curl http://localhost` → HTTP 200
+- 아웃바운드 검증: `curl https://example.com` 성공
+- 외부 접속 검증: `http://3.27.173.167` 접속 및 정상 화면 확인
+- 헬스체크 검증: `http://3.27.173.167/health` 접속 및 정상 응답 확인
 
 <br>
 
-# 9. 외부 접속 테스트
-
-**이제 인터넷의 누구나 당신의 웹 서버에 접속할 수 있는지 확인합니다.**
-
-## 1단계: 퍼블릭 IP 확인
-
-```
-AWS 콘솔 - EC2 - Instances 
-→ 방금 만든 인스턴스 선택 
-→ "Public IPv4 address" 확인 (예: 12.34.56.78)
-```
-
-## 2단계: 브라우저에서 접속
-
-**방법 1: SSH 접속 해제 후**
-```bash
-# EC2 인스턴스의 터미널에서 빠져나옴
-exit
-```
-
-**방법 2: 새로운 브라우저 탭에서**
-```
-http://<퍼블릭IP>
-예) http://12.34.56.78
-```
-
-
-![alt text](docs/screenshots/public-ip.png)
-
-## 3단계: 상세 확인
-
-브라우저에서 다음 주소도 확인:
-```
-http://<퍼블릭IP>/health
-예) http://12.34.56.78/health
-```
-
-![alt text](docs/screenshots/public-ip-health.png)
-
-> ✅ **성공:** 서버가 인터넷에 공개됨
-
-<br>
-
-# Study
-
-## Q1. 왜 Subnet이 2개인가요?
-
-**이유:**
-- **가용성**: 한 서버가 고장 나도 다른 서버는 살아있음
-- **재해복구**: 다른 데이터센터(가용 영역)에 백업
-- 실무에서 필수적인 설정
-
-## Q2. localhost vs 퍼블릭 IP 뭐가 다른가요?
-
-| 구분 | localhost | 퍼블릭 IP |
-|------|-----------|----------|
-| **접속 위치** | EC2 내부에서만 | 어디서나 가능 |
-| **명령어** | `curl http://localhost` | 브라우저: `http://12.34.56.78` |
-| **의미** | 자신한테만 접속 | 인터넷 전체가 접속 가능 |
-
-
-<br>
-
-# 10. 마지막 정리 (리소스 삭제)
-
-설정의 역순으로 삭제해야 합니다. 순서를 지키지 않으면 오류가 발생합니다.
-
-
-### 1️⃣ EC2 인스턴스 종료
-```
-EC2 - Instances 
-→ 인스턴스 선택 - 마우스 우클릭 
-→ "Instance State" - "Terminate" 
-→ 확인
-```
-⏳ 1-2분 기다리기 (상태가 "terminated"로 변함)
-
-### 2️⃣ Route Table 삭제
-```
-VPC - Route Tables 
-→ 생성한 Route Table 선택 
-→ "Delete" 
-→ 확인
-```
-
-### 3️⃣ Internet Gateway 분리 & 삭제
-```
-VPC - Internet Gateways 
-→ 생성한 IGW 선택
-→ "Actions" - "Detach from VPC" (분리)
-→ 다시 선택 - "Delete" (삭제)
-```
-
-### 4️⃣ Security Group 삭제
-```
-EC2 - Security Groups 
-→ 생성한 Security Group 선택 
-→ "Delete"
-```
-
-### 5️⃣ Subnet 삭제
-```
-VPC - Subnets 
-→ 생성한 Subnet 선택 
-→ "Delete"
-→ 2개 모두 삭제
-```
-
-### 6️⃣ VPC 삭제
-```
-VPC - Your VPCs 
-→ 생성한 VPC 선택 
-→ "Delete VPC"
-```
-
-### 7️⃣ Billing Dashboard 확인
-```
-AWS 콘솔 - Billing Dashboard
-→ Estimated Charges 확인 (0원이면 정상)
-```
-
->  **모든 리소스 삭제 완료!**

@@ -59,3 +59,28 @@
 - 외부 접속 증빙: 브라우저 화면 또는 `/health` 응답 스크린샷
 - 트러블슈팅 보고서: 문제, 원인 추측, 확인, 수정, 결과, 재발 방지를 적은 문서
 - 리소스 정리 체크리스트: 종료와 삭제가 끝났다는 근거를 적은 문서
+
+# 최종 결과물
+- [x][아키텍처 다이어그램](docs/architecture.png)
+
+- [x] 웹 서비스 외부 접속 증빙 1개
+
+    - [x] A. 브라우저 주소창 `http://3.27.173.167`
+
+        ![alt text](docs/screenshots/public-ip.png)
+
+    - [x] B. 헬스체크 호출 `http://3.27.173.167/health`
+        정상 화면 또는 200 OK 확인
+        
+        ![alt text](docs/screenshots/public-ip-health.png)
+
+- [x] [트러블슈팅 보고서](docs/troubleshooting.md)
+    
+- [] 리소스 정리 체크리스트 1개
+    - [x] EC2 인스턴스 종료
+    - [x] EBS 볼륨 삭제 (EC2 종료시 함께 삭제됨)
+    - [x] Elastic IP 해제
+    - [x] Internet Gateway 분리 후 삭제
+    - [x] VPC 삭제
+    - [ ] Billing Dashboard 확인    
+
